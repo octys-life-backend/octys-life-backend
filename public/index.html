@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octy's Life</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; background: #000; color: #fff; margin: 0; padding-bottom: 50px; }
+        .header { background: #111; padding: 20px; text-align: center; border-bottom: 2px solid #00ffcc; position: sticky; top: 0; }
+        .feed-container { max-width: 600px; margin: 0 auto; padding-top: 20px; }
+        .post { background: #0a0a0a; border: 1px solid #333; margin-bottom: 30px; }
+        .post-header { padding: 15px; font-weight: bold; font-size: 18px; color: #fff; border-bottom: 1px solid #222; }
+        .post-image { width: 100%; display: block; }
+        .actions { padding: 15px; background: #111; display: flex; align-items: center; justify-content: space-between; }
+        .fwi-btn { background: transparent; color: #00ffcc; border: 2px solid #00ffcc; padding: 10px 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .fwi-btn:hover { background: #00ffcc; color: #000; }
+        .count-text { color: #888; font-size: 14px; margin-right: 10px; }
+        .caption { padding: 15px; color: #ddd; line-height: 1.4; border-top: 1px solid #222; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>🐙 OCTY'S LIFE</h1></div>
+    <div id="feed" class="feed-container"></div>
+    <script>
+        async function loadFeed() {
+            const response = await fetch('/feed');
+            const posts = await response.json();
+            const feedDiv = document.getElementById('feed');
+            feedDiv.innerHTML = ''; 
+            posts.forEach(post => {
+                feedDiv.innerHTML += `
+                    <div class="post">
+                        <div class="post-header">@${post.username}</div>
+                        <img src="${post.photo_url}" class="post-image">
+                        <div class="actions">
+                            <button class="fwi-btn" onclick="sendFWI(${post.id})">You fuck with it?</button>
+                            <span class="count-text"><span id="score-${post.id}" class="count-number">${post.likes}</span> people fwi</span>
+                        </div>
+                        <div class="caption">${post.caption}</div>
+                    </div>
+                `;
+            });
+        }
+        async function sendFWI(id) {
+            const response = await fetch('/like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            const data = await response.json();
+            if(data.success) {
+                document.getElementById(`score-${id}`).innerText = data.newCount;
+            }
+        }
+        loadFeed();
+    </script>
+</body>
+</html>
